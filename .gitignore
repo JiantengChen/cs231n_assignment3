@@ -1,0 +1,8 @@
+
+__pycache__
+*.pyc
+
+cifar-10-batches-py/
+imagenet_val_25.npz
+coco_captioning/
+

@@ -148,7 +148,40 @@ class CaptioningRNN:
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # JIANTENG -
+        # Init
+        if self.cell_type == "rnn":
+            forward = rnn_forward
+            backward = rnn_backward
+        elif self.cell_type == "lstm":
+            forward = lstm_forward
+            backward = lstm_backward
+        else:
+            raise ValueError("Invalid cell_type")
+
+        # Forward
+        h0, cache_proj = affine_forward(features, W_proj, b_proj)
+        x, cache_embed = word_embedding_forward(captions_in, W_embed)
+        h, cache_h = forward(x, h0, Wx, Wh, b)
+        scores, cache_scores = temporal_affine_forward(h, W_vocab, b_vocab)
+
+        loss, dscores = temporal_softmax_loss(scores, captions_out, mask)
+
+        # Backward
+        dh, dW_vocab, db_vocab = temporal_affine_backward(dscores, cache_scores)
+        dx, dh0, dWx, dWh, db = backward(dh, cache_h)
+        dW_embed = word_embedding_backward(dx, cache_embed)
+        dfeatures, dW_proj, db_proj = affine_backward(dh0, cache_proj)
+
+        # Store grads
+        grads["W_proj"] = dW_proj
+        grads["b_proj"] = db_proj
+        grads["W_embed"] = dW_embed
+        grads["Wx"] = dWx
+        grads["Wh"] = dWh
+        grads["b"] = db
+        grads["W_vocab"] = dW_vocab
+        grads["b_vocab"] = db_vocab
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################

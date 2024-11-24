@@ -249,7 +249,25 @@ class CaptioningRNN:
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        # JIANTENG -
+
+        # init
+
+        h, _ = affine_forward(features, W_proj, b_proj)
+        x = np.repeat(self._start, N)
+        c = np.zeros(h.shape)
+
+        for t in range(max_length):
+            x, _ = word_embedding_forward(x, W_embed)
+            if self.cell_type == "rnn":
+                h, _ = rnn_step_forward(x, h, Wx, Wh, b)
+            elif self.cell_type == "lstm":
+                h, c, _ = lstm_step_forward(x, h, c, Wx, Wh, b)
+            else:
+                raise ValueError("Invalid cell_type")
+            scores, _ = affine_forward(h, W_vocab, b_vocab)
+            x = np.argmax(scores, axis=1)
+            captions[:, t] = x
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
